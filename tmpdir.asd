@@ -4,6 +4,6 @@
   :license  "MIT license"
   :version "0.0.1"
   :serial t
-  :depends-on (:uiop)
+  :depends-on (:cl-fad)
   :components ((:file "package")
                (:file "tmpdir")))

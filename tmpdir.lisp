@@ -10,8 +10,14 @@
       name)))
 
 (defmacro with-tmpdir ((name &rest args) &body body*)
-  `(let ((,name (mkdtemp ,@args)))
-     (unwind-protect
-          (progn
-            ,@body*)
-       (uiop:delete-directory-tree ,name :validate t))))
+  (let ((tmp-name (gensym)))
+    `(let ((,tmp-name (mkdtemp ,@args)))
+       (let ((,name ,tmp-name)) ;; this let's us do things like (with-tmpdir(*foobar*) ..)
+        (unwind-protect
+             (progn
+               ,@body*)
+          ;; workaround bug in cl-fad for lispworks, see
+          ;; https://github.com/edicl/cl-fad/pull/30
+          (let (#+lispworks
+                (system:*directory-link-transparency* nil))
+           (fad:delete-directory-and-files ,tmp-name)))))))
